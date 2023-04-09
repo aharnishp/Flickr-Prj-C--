@@ -2,12 +2,21 @@
 #include<fstream>
 #include<vector>
 #include<map>
+#include<unistd.h>
+
+
+#ifdef __unix__ || defined(__APPLE__)
+    #define is_OS_unix 1
+#elif defined(_WIN32) || defined(WIN32)
+    #define is_OS_unix 0
+#endif
+
 
 #define fori(i,n) for(int i = 0; i < n; i++)
 
 using namespace std;
 
-#define GROUP_SIZE 5
+// #define GROUP_SIZE 5
 
 
 long long convert_id_to_int(string &str){
@@ -29,13 +38,48 @@ long long convert_id_to_int(string &str){
 map<pair<long long, long long>, int> edge_map;
 
 
-int main(){
+int main(int argc, char *argv[]) {
+
+    string GROUP_SIZE = "5";
+
+    // get group size from arguments
+    if(argc > 1){
+        GROUP_SIZE = argv[1];
+    }
+
+
+#ifdef is_OS_unix
+    string requiredOutputFilename = "../data-intermediate/checked-friends" + GROUP_SIZE + ".csv";
+    string requiredInputFileName = "../friends" + GROUP_SIZE + ".csv";
+#else
+    string requiredOutputFilename = "..\\data-intermediate\\checked-friends" + GROUP_SIZE + ".csv";
+    string requiredInputFileName = "..\\friends" + GROUP_SIZE + ".csv";
+#endif
+
+    // convert string to char array
+    char *requiredOutputFilenameChar = new char[requiredOutputFilename.size() + 1];
+    copy(requiredOutputFilename.begin(), requiredOutputFilename.end(), requiredOutputFilenameChar);
+    requiredOutputFilenameChar[requiredOutputFilename.size()] = '\0';
+
+    char *requiredInputFileNameChar = new char[requiredInputFileName.size() + 1];
+    copy(requiredInputFileName.begin(), requiredInputFileName.end(), requiredInputFileNameChar);
+    requiredInputFileNameChar[requiredInputFileName.size()] = '\0';
+
+
+    // check if the required input file exists
+    if(access(requiredInputFileNameChar, F_OK) == -1){
+        cout << "Required input file does not exist" << endl;
+        cout << "Filename: '" << requiredInputFileNameChar << "'" << endl;
+        return 0;
+    }
+
+    
     // read file edges15.csv
-    ifstream file("../../friends15.csv");
+    ifstream file(requiredInputFileNameChar);
 
 
     // write output to file data-intermediate/edges5.csv
-    ofstream outfile("../../data-intermediate/checked-friends15.csv");
+    ofstream outfile(requiredOutputFilenameChar);
 
     string str;
     string str1, str2;
