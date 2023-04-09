@@ -5,7 +5,7 @@
 #include<unistd.h>
 
 
-#ifdef __unix__ || defined(__APPLE__)
+#if defined(__unix__) || defined(__APPLE__)
     #define is_OS_unix 1
 #elif defined(_WIN32) || defined(WIN32)
     #define is_OS_unix 0

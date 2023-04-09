@@ -7,7 +7,7 @@
 #include<map>
 #include<unistd.h>
 
-#ifdef __unix__ || defined(__APPLE__)
+#if defined(__unix__) || defined(__APPLE__)
     #define is_OS_unix 1
 #elif defined(_WIN32) || defined(WIN32)
     #define is_OS_unix 0
@@ -44,15 +44,19 @@ int main(int argc, char *argv[]) {
     // get group size from arguments
     if(argc > 1){
         GROUP_SIZE = argv[1];
+    }else{
+        cout << "To define input files, use: ./edges ${Group Count}" << endl;
+        cout << "Example: ./edges 15" << endl;
+        cout << "will use files 'edges15.csv' and output to 'weighted-edges15.csv'" << endl;
     }
 
 // for windows file support
 #ifdef is_OS_unix
-    string requiredOutputFilename = "../data-intermediate/edges" + GROUP_SIZE + ".csv";
+    string requiredOutputFilename = "../data-intermediate/weighted-edges" + GROUP_SIZE + ".csv";
     string outputMaxWeightFilename = "../data-intermediate/max-edge-weight"+ GROUP_SIZE + ".csv";
     string requiredInputFileName = "../edges" + GROUP_SIZE + ".csv";
 #else
-    string requiredOutputFilename = "..\\data-intermediate\\edges" + GROUP_SIZE + ".csv";
+    string requiredOutputFilename = "..\\data-intermediate\\weighted-edges" + GROUP_SIZE + ".csv";
     string outputMaxWeightFilename = "..\\data-intermediate\\max-edge-weight"+ GROUP_SIZE + ".csv";
     string requiredInputFileName = "..\\edges" + GROUP_SIZE + ".csv";
 #endif
