@@ -51,7 +51,7 @@ long long intersection_set_length = 0;
 map<int,set<pair<ll,ll>>> edge_by_weight_map;
 
 // int storing the number of common friends
-int common_friends = 0;
+long long common_friends = 0;
 
 ll convert_id_to_int(string &str){
     // remove characters from the string
@@ -164,7 +164,7 @@ int read_friend(string fileSuffix){
     #ifdef is_OS_unix
         string requiredInputFileName = intermediate_data_dir+"checked-friends" + GROUP_SIZE + ".csv";
     #else
-        string requiredInputFileName = "..\\data-intermediate\\checked-friends" + GROUP_SIZE + ".csv";
+        string requiredInputFileName = intermediate_data_dir+"checked-friends" + GROUP_SIZE + ".csv";
     #endif
 
     // convert string to char array
@@ -206,7 +206,7 @@ int read_edge(string fileSuffix){
     #ifdef is_OS_unix
         string requiredInputFileName = intermediate_data_dir+"weighted-edges" + GROUP_SIZE + ".csv";
     #else
-        string requiredInputFileName = "..\\data-intermediate\\weighted-edges" + GROUP_SIZE + ".csv";
+        string requiredInputFileName = intermediate_data_dir+"weighted-edges" + GROUP_SIZE + ".csv";
     #endif
 
     // convert string to char array
@@ -233,7 +233,7 @@ int read_edge(string fileSuffix){
         ll weight = convert_id_to_int(str3);
 
         // as the file is already processed, we can directly insert the edge to the map
-        edge_map[{id1, id2}] = weight;
+        // edge_map[{id1, id2}] = weight;
         if(weight > max_edge_weight){
             max_edge_weight = weight;
         }
@@ -260,9 +260,9 @@ int edge_processor(string fileSuffix){
     string outputMaxWeightFilename = intermediate_data_dir+"max-edge-weight"+ GROUP_SIZE + ".csv";
     string requiredInputFileName = "../edges" + GROUP_SIZE + ".csv";
 #else
-    string requiredOutputFilename = "..\\data-intermediate\\weighted-edges" + GROUP_SIZE + ".csv";
-    string outputMaxWeightFilename = "..\\data-intermediate\\max-edge-weight"+ GROUP_SIZE + ".csv";
-    string requiredInputFileName = "..\\edges" + GROUP_SIZE + ".csv";
+    string requiredOutputFilename = intermediate_data_dir+"weighted-edges" + GROUP_SIZE + ".csv";
+    string outputMaxWeightFilename = intermediate_data_dir+"max-edge-weight"+ GROUP_SIZE + ".csv";
+    string requiredInputFileName = input_data_dir+"edges" + GROUP_SIZE + ".csv";
 #endif
 
     // convert string to char array
@@ -497,9 +497,14 @@ float calculate_inter_over_Gsk(long common_group_size){
     long long edges_in_similar_atleast = get_len_edges_in_similar_atleast(common_group_size);
 
     return setLen / (double)(edges_in_similar_atleast);
-    
-
 }
+
+float calculate_inter_over_Gf(long common_group_size){
+
+    long long setLen = calculate_intersection(common_group_size);
+
+    return setLen / (double)(common_friends);
+}   
 
 int check_pre_process_cache_exists(string fileSuffix){
     string GROUP_SIZE = fileSuffix;
@@ -511,8 +516,8 @@ int check_pre_process_cache_exists(string fileSuffix){
     string requiredEdgeFilename = intermediate_data_dir+"weighted-edges" + GROUP_SIZE + ".csv";
     string requiredFriendFilename = intermediate_data_dir+"checked-friends" + GROUP_SIZE + ".csv";
 #else
-    string requiredEdgeFilename = "..\\data-intermediate\\weighted-edges" + GROUP_SIZE + ".csv";
-    string requiredFriendFilename = "..\\data-intermediate\\checked-friends" + GROUP_SIZE + ".csv";
+    string requiredEdgeFilename = intermediate_data_dir+"weighted-edges" + GROUP_SIZE + ".csv";
+    string requiredFriendFilename = intermediate_data_dir+"checked-friends" + GROUP_SIZE + ".csv";
 #endif
 
     // convert string to char array
@@ -563,6 +568,21 @@ int check_pre_process_cache_exists(string fileSuffix){
 }
 
 
+int store_vector_float_to_filename(vector<float> &vec, string filename){
+    ofstream myfile;
+
+    // convert to char array
+    char *filename_char = new char[filename.size() + 1];
+    copy(filename.begin(), filename.end(), filename_char);
+    filename_char[filename.size()] = '\0';
+
+    myfile.open(filename);
+    for(auto it = vec.begin(); it != vec.end(); it++){
+        myfile << *it << endl;
+    }
+    myfile.close();
+    return 0;
+}
 
 int main(int argc, char *argv[]) {
     string GROUP_SIZE = "15";
@@ -592,15 +612,30 @@ int main(int argc, char *argv[]) {
 
     float temp = 0;
 
-    // print value of intersection over union
+    // print value of intersection over count of Gsk
     // cout << "Intersection over union: " << calculate_inter_over_Gsk(5) << endl;
     for(int i = max_edge_weight; i > 0; i--){
-        temp = calculate_inter_over_Gsk(i)
-        cout << "Intersection over union for common groups (" << i << "): Value = " << temp << endl;
+        temp = calculate_inter_over_Gsk(i);
+        cout << "Intersection over GsK for common groups (" << i << "): Value = " << temp << endl;
         outputs_inter_over_Gsk.push_back(temp);
     }
     
-    // store to file 
+    // store to file
+    store_vector_float_to_filename(outputs_inter_over_Gsk, "outputs_inter_over_Gsk.csv");
+
+    vector<float> outputs_inter_over_Gf;
+
+    // print value of intersection over count of Gf
+    // cout << "Intersection over union: " << calculate_inter_over_Gf(5) << endl;
+    for(int i = max_edge_weight; i > 0; i--){
+        temp = calculate_inter_over_Gf(i);
+        cout << "Intersection over Gf for common groups (" << i << "): Value = " << temp << endl;
+        outputs_inter_over_Gf.push_back(temp);
+    }
+
+    // store to file
+    store_vector_float_to_filename(outputs_inter_over_Gf, "outputs_inter_over_Gf.csv");
+
 
     return 0;
 
