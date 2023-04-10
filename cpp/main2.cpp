@@ -5,6 +5,9 @@
 #include<set>
 
 #define fori(i,n) for(int i = 0; i < n; i++)
+#define ll long long
+#define pb push_back
+
 
 #if defined(__unix__) || defined(__APPLE__)
     #define is_OS_unix 1
@@ -19,24 +22,38 @@
 using namespace std;
 
 
+// Global Settings
+string GROUP_SIZE = "15";
+
+#ifdef is_OS_unix
+    string intermediate_data_dir = "../data-intermediate/";
+    string input_data_dir = "../";
+#else
+    string intermediate_data_dir = "..\\data-intermediate\\";
+    string input_data_dir = "..\\"; 
+#endif
+
 // Global variables
-map<pair<long long, long long>, int> edge_map;
-map<pair<long long, long long>, int> friend_map;
+map<pair<ll, ll>, int> edge_map;
+map<pair<ll, ll>, int> friend_map;
 long max_edge_weight = 0;
 
 // map storing union of friends and edges
-map<pair<long long, long long>, int> union_map;
+map<pair<ll, ll>, int> union_map;
 
-// map storing intersection of friends and edges
-map<pair<long long, long long>, int> intersection_map;
+// set storing intersection of friends and edges
+set<pair<ll, ll>> intersection_set;
+long intersection_set_init = 0;
+long intersection_set_atleast_weight = 0;
+long long intersection_set_length = 0;
 
 // map storing the edge by weights
-map<int,set<pair<long long,long long>>> edge_by_weight_map;
+map<int,set<pair<ll,ll>>> edge_by_weight_map;
 
 // int storing the number of common friends
 int common_friends = 0;
 
-long long convert_id_to_int(string &str){
+ll convert_id_to_int(string &str){
     // remove characters from the string
     int strlen = str.size();
 
@@ -47,7 +64,7 @@ long long convert_id_to_int(string &str){
         }
     }
 
-    long long id_int = stoll(newstr);
+    ll id_int = stoll(newstr);
     return(id_int);
 }
 
@@ -57,11 +74,11 @@ int friend_processor(string fileSuffix) {
     string GROUP_SIZE = fileSuffix;
 
     #ifdef is_OS_unix
-        string requiredOutputFilename = "../data-intermediate/checked-friends" + GROUP_SIZE + ".csv";
-        string requiredInputFileName = "../friends" + GROUP_SIZE + ".csv";
+        string requiredOutputFilename = intermediate_data_dir+"checked-friends" + GROUP_SIZE + ".csv";
+        string requiredInputFileName = input_data_dir+"friends" + GROUP_SIZE + ".csv";
     #else
-        string requiredOutputFilename = "..\\data-intermediate\\checked-friends" + GROUP_SIZE + ".csv";
-        string requiredInputFileName = "..\\friends" + GROUP_SIZE + ".csv";
+        string requiredOutputFilename = intermediate_data_dir+"checked-friends" + GROUP_SIZE + ".csv";
+        string requiredInputFileName = input_data_dir+"friends" + GROUP_SIZE + ".csv";
     #endif
 
         // convert string to char array
@@ -102,8 +119,8 @@ int friend_processor(string fileSuffix) {
         str1 = str.substr(0, pos);
         str2 = str.substr(pos+1, str.size());
         
-        long long id1 = convert_id_to_int(str1);
-        long long id2 = convert_id_to_int(str2);
+        ll id1 = convert_id_to_int(str1);
+        ll id2 = convert_id_to_int(str2);
 
         // check if the edge is already present
         if(friend_map.find({id1, id2}) != friend_map.end() or friend_map.find({id2, id1}) != friend_map.end()){
@@ -145,7 +162,7 @@ int read_friend(string fileSuffix){
     string GROUP_SIZE = fileSuffix;
 
     #ifdef is_OS_unix
-        string requiredInputFileName = "../data-intermediate/checked-friends" + GROUP_SIZE + ".csv";
+        string requiredInputFileName = intermediate_data_dir+"checked-friends" + GROUP_SIZE + ".csv";
     #else
         string requiredInputFileName = "..\\data-intermediate\\checked-friends" + GROUP_SIZE + ".csv";
     #endif
@@ -166,8 +183,8 @@ int read_friend(string fileSuffix){
         str1 = str.substr(0, pos);
         str2 = str.substr(pos+1, str.size());
         
-        long long id1 = convert_id_to_int(str1);
-        long long id2 = convert_id_to_int(str2);
+        ll id1 = convert_id_to_int(str1);
+        ll id2 = convert_id_to_int(str2);
 
         // as the file is already processed, we can directly add the edge to the map
         friend_map[{id1, id2}] = 1;
@@ -187,7 +204,7 @@ int read_edge(string fileSuffix){
     string GROUP_SIZE = fileSuffix;
 
     #ifdef is_OS_unix
-        string requiredInputFileName = "../data-intermediate/weighted-edges" + GROUP_SIZE + ".csv";
+        string requiredInputFileName = intermediate_data_dir+"weighted-edges" + GROUP_SIZE + ".csv";
     #else
         string requiredInputFileName = "..\\data-intermediate\\weighted-edges" + GROUP_SIZE + ".csv";
     #endif
@@ -211,9 +228,9 @@ int read_edge(string fileSuffix){
         str2 = str.substr(pos1+1, pos2-pos1-1);
         str3 = str.substr(pos2+1, str.size());
 
-        long long id1 = convert_id_to_int(str1);
-        long long id2 = convert_id_to_int(str2);
-        long long weight = convert_id_to_int(str3);
+        ll id1 = convert_id_to_int(str1);
+        ll id2 = convert_id_to_int(str2);
+        ll weight = convert_id_to_int(str3);
 
         // as the file is already processed, we can directly insert the edge to the map
         edge_map[{id1, id2}] = weight;
@@ -221,7 +238,7 @@ int read_edge(string fileSuffix){
             max_edge_weight = weight;
         }
 
-        edge_by_weight[weight].push_back({id1, id2});
+        edge_by_weight_map[weight].insert({id1, id2});
     }
 
     file.close();
@@ -239,8 +256,8 @@ int edge_processor(string fileSuffix){
 
     // for windows file support
 #ifdef is_OS_unix
-    string requiredOutputFilename = "../data-intermediate/weighted-edges" + GROUP_SIZE + ".csv";
-    string outputMaxWeightFilename = "../data-intermediate/max-edge-weight"+ GROUP_SIZE + ".csv";
+    string requiredOutputFilename = intermediate_data_dir+"weighted-edges" + GROUP_SIZE + ".csv";
+    string outputMaxWeightFilename = intermediate_data_dir+"max-edge-weight"+ GROUP_SIZE + ".csv";
     string requiredInputFileName = "../edges" + GROUP_SIZE + ".csv";
 #else
     string requiredOutputFilename = "..\\data-intermediate\\weighted-edges" + GROUP_SIZE + ".csv";
@@ -296,8 +313,8 @@ int edge_processor(string fileSuffix){
         str2 = str.substr(pos+1, str.size());
 
         // convert string to int
-        long long id1 = convert_id_to_int(str1);
-        long long id2 = convert_id_to_int(str2);
+        ll id1 = convert_id_to_int(str1);
+        ll id2 = convert_id_to_int(str2);
 
         // search pair in map
         auto it = edge_map.find(make_pair(id1, id2));
@@ -330,6 +347,9 @@ int edge_processor(string fileSuffix){
     // write the map pair with weights
     for(auto it = edge_map.begin(); it != edge_map.end(); it++){
         outfile << it->first.first << "," << it->first.second << "," << it->second << endl;
+
+        // add to edge_by_weight
+        edge_by_weight_map[it->second].insert({it->first.first, it->first.second});
     } 
 
     // write maxWeight to file
@@ -351,8 +371,135 @@ int edge_processor(string fileSuffix){
 }
 
 
-int 
+// take in argument of function as pointer to edge_by_weight_map
+ll intersection_len_calculator(long common_group_size, map<int, set<pair<ll, ll>>> *edge_by_weight, map<pair<ll, ll>, int> *friend_map){
+    ll count = 0;
+    // for each pair in edge_by_weight_map[common_group_size], check if they are friends
+    // if they are friends, add to count
+    for(auto it = edge_by_weight_map[common_group_size].begin(); it != edge_by_weight_map[common_group_size].end(); it++){
+        // check if they are friends
+        auto it2 = friend_map->find(make_pair(it->first, it->second));
+        if(it2 == friend_map->end()){
+            // pair not found
+            it2 = friend_map->find(make_pair(it->second, it->first));
+        }
 
+        if(it2 != friend_map->end()){
+            // pair found
+            count += 1;
+        }
+    }
+    return count;
+}
+
+// ll union_len_calculator(long common_group_size, map<int, set<pair<ll, ll>>> *edge_by_weight){
+//     ll count = 0;
+//     // for each pair in edge_by_weight_map[common_group_size], add to count
+//     for(auto it = edge_by_weight_map[common_group_size].begin(); it != edge_by_weight_map[common_group_size].end(); it++){
+//         count += 1;
+//     }
+//     return count;
+// }
+
+
+long long calculate_intersection(long atleast_group_size){
+    // for each pair in edge_by_weight_map[common_group_size], check if they are friends
+    // if they are friends, add to intersection_set
+
+    if(intersection_set_atleast_weight == atleast_group_size){
+        return intersection_set_length;
+    }else if(intersection_set_atleast_weight > atleast_group_size){
+
+    }else{
+        intersection_set.clear();
+        intersection_set_atleast_weight = max_edge_weight;
+    }
+
+    intersection_set_init = false;
+
+    long this_group_size = atleast_group_size;
+
+
+    // iterating over different weights from max to atleast required
+    // if the values for more common groups are cached, then it will not be calculated again
+
+    for(this_group_size = intersection_set_atleast_weight; this_group_size > atleast_group_size;  this_group_size-- ){
+    // for(this_group_size = atleast_group_size; this_group_size < max_edge_weight;  this_group_size++ ){
+        for(auto it = edge_by_weight_map[this_group_size].begin(); it != edge_by_weight_map[this_group_size].end(); it++){
+            // check if they are friends
+            auto it2 = friend_map.find(make_pair(it->first, it->second));
+            if(it2 == friend_map.end()){
+                // pair not found
+                it2 = friend_map.find(make_pair(it->second, it->first));
+            }
+
+            if(it2 != friend_map.end()){
+                // pair found
+                intersection_set.insert(make_pair(it->first, it->second));
+            }
+        }
+    }
+
+    intersection_set_length = intersection_set.size();
+
+    intersection_set_init = true;
+    intersection_set_atleast_weight = atleast_group_size;
+
+    return intersection_set_length;
+}
+
+ll false_positive_len(long common_group_size){
+    // for each pair in edge_by_weight_map[common_group_size], check if they are friends
+    // if they are friends, add to intersection_set
+
+
+    calculate_intersection(common_group_size);
+
+    long this_group_size;
+
+    set<pair<ll, ll>> false_positive_set;
+
+    // copy all pairs in edge_by_weight_map[common_group_size] to false_positive_set
+    for(this_group_size = common_group_size; this_group_size < max_edge_weight; this_group_size++){
+        for(auto it = edge_by_weight_map[this_group_size].begin(); it != edge_by_weight_map[this_group_size].end(); it++){
+            false_positive_set.insert(*it);
+        }
+    }
+
+    // remove all pairs in intersection_set from false_positive_set
+    for(auto it = intersection_set.begin(); it != intersection_set.end(); it++){
+        false_positive_set.erase(*it);
+    }
+
+    return false_positive_set.size(); 
+
+}
+
+int false_negative_len(long common_group_size){
+
+}
+
+
+long long get_len_edges_in_similar_atleast(long common_group_size){
+    long long sum = 0;
+
+    for(long i = common_group_size; i < max_edge_weight; i++){
+        sum += edge_by_weight_map[i].size();
+    }
+    return sum;
+}
+
+
+float calculate_inter_over_Gsk(long common_group_size){
+
+    long long setLen = calculate_intersection(common_group_size);
+
+    long long edges_in_similar_atleast = get_len_edges_in_similar_atleast(common_group_size);
+
+    return setLen / (double)(edges_in_similar_atleast);
+    
+
+}
 
 int check_pre_process_cache_exists(string fileSuffix){
     string GROUP_SIZE = fileSuffix;
@@ -361,8 +508,8 @@ int check_pre_process_cache_exists(string fileSuffix){
     int friends_processed = 0;
 
 #ifdef is_OS_unix
-    string requiredEdgeFilename = "../data-intermediate/weighted-edges" + GROUP_SIZE + ".csv";
-    string requiredFriendFilename = "../data-intermediate/checked-friends" + GROUP_SIZE + ".csv";
+    string requiredEdgeFilename = intermediate_data_dir+"weighted-edges" + GROUP_SIZE + ".csv";
+    string requiredFriendFilename = intermediate_data_dir+"checked-friends" + GROUP_SIZE + ".csv";
 #else
     string requiredEdgeFilename = "..\\data-intermediate\\weighted-edges" + GROUP_SIZE + ".csv";
     string requiredFriendFilename = "..\\data-intermediate\\checked-friends" + GROUP_SIZE + ".csv";
@@ -441,9 +588,19 @@ int main(int argc, char *argv[]) {
     cout << "Size of edge map: " << edge_map.size() << endl;
     cout << "Size of friend map: " << friend_map.size() << endl;
 
-    // calculate the union
+    vector<float> outputs_inter_over_Gsk;
 
+    float temp = 0;
+
+    // print value of intersection over union
+    // cout << "Intersection over union: " << calculate_inter_over_Gsk(5) << endl;
+    for(int i = max_edge_weight; i > 0; i--){
+        temp = calculate_inter_over_Gsk(i)
+        cout << "Intersection over union for common groups (" << i << "): Value = " << temp << endl;
+        outputs_inter_over_Gsk.push_back(temp);
+    }
     
+    // store to file 
 
     return 0;
 
