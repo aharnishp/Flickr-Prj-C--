@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
         
         system(edgeExec);
 #else
-        cout << "Please run compile & run pre-processors/edges.cpp manually as you are not using Linux." << endl;
+        cout << "Please run compile & run pre-processors/edges.cpp manually as system is not Unix-like." << endl;
         return 0;
 #endif
     }
@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
         system(friendExec);
         // system("./pre-processors/friend-finder " + GROUP_SIZE_char);
 #else
-        cout << "Please compile & run pre-processors/friend.cpp manually as you are not using Linux." << endl;
+        cout << "Please compile & run pre-processors/friend.cpp manually as system is not Unix-like." << endl;
         return 0;   
 #endif
     }
