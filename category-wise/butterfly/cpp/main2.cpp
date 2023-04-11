@@ -124,7 +124,7 @@ int friend_processor(string fileSuffix) {
 
         // check if the edge is already present
         if(friend_map.find({id1, id2}) != friend_map.end() or friend_map.find({id2, id1}) != friend_map.end()){
-            // cout << "Duplicate edge: " << id1 << " " << id2 << endl;
+            cout << "Duplicate edge: " << id1 << " " << id2 << endl;
             // write to file
             outfile << id1 << "," << id2 << endl;
             common_friends++;
