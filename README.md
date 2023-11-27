@@ -4,7 +4,9 @@ This part of code is responsible for parsing the input graph of users on flicker
 
 ## Code Arcitecture
 The main file inputs .csv files, and converts it to a temporary intermediate version to reduce memory requirements (converting strings to numbers, and also to test different logic faster by not ingesting full file sizes everytime) during processing time, and also optimised with map data structure to finds the bins faster.
-This was re-written from scratch in C++ to use proper data structure and to reduce inefficient memory usage observed in previous python implementation (roughly 50x reduction in main memory requirement and 3x reduction in time).
+This was re-written from scratch in C++ to use proper data structure and to reduce inefficient memory usage observed in previous python implementation (roughly 50x reduction in main memory requirement and 3x reduction in time). 
+
+Although initially planned to support parallel data reading and processing, supporting both Linux and Windows with multi-processing would have added unnecessary complexity. 
 
 ## Results
 ![final_output](https://github.com/aharnishp/Flickr-Prj-Cpp/assets/69157507/3bf8ebf1-078b-410d-82b3-e84b49bef047)
